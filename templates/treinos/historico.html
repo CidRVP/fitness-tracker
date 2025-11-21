@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title">Histórico de Treinos</h4>
+                <a href="{% url 'criar_treino' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>Novo Treino
+                </a>
+            </div>
+            <div class="card-body">
+                {% if treinos %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo de Treino</th>
+                                <th>Exercícios</th>
+                                <th>Observações</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for treino in treinos %}
+                            <tr>
+                                <td>{{ treino.data }}</td>
+                                <td>{{ treino.tipo_treino }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ treino.exercicios.count }}</span>
+                                </td>
+                                <td>
+                                    {% if treino.observacoes %}
+                                    <small class="text-muted">{{ treino.observacoes|truncatewords:5 }}</small>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'detalhes_treino' treino.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-dumbbell fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum treino encontrado</h5>
+                    <p class="text-muted">Comece criando seu primeiro treino!</p>
+                    <a href="{% url 'criar_treino' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Criar Primeiro Treino
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Comparar Performance</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="exercicio" class="form-label">Selecione o Exercício</label>
+                            <select name="exercicio" id="exercicio" class="form-select" required>
+                                <option value="">Selecione um exercício...</option>
+                                {% for exercicio in exercicios %}
+                                <option value="{{ exercicio.id }}">{{ exercicio.nome }} ({{ exercicio.get_categoria_display }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-chart-line me-1"></i>Comparar Performance
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                {% if dados_comparacao %}
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ dados_comparacao.exercicio }}</h5>
+                        
+                        <div class="row text-center">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <strong>Primeiro Registro</strong>
+                                        <br>
+                                        <small class="text-muted">{{ dados_comparacao.primeiro.data }}</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>{{ dados_comparacao.primeiro.carga }} kg</h4>
+                                        <p class="mb-1">{{ dados_comparacao.primeiro.series }} séries</p>
+                                        <p class="mb-0">{{ dados_comparacao.primeiro.repeticoes }} reps</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <strong>Último Registro</strong>
+                                        <br>
+                                        <small class="text-muted">{{ dados_comparacao.ultimo.data }}</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4>{{ dados_comparacao.ultimo.carga }} kg</h4>
+                                        <p class="mb-1">{{ dados_comparacao.ultimo.series }} séries</p>
+                                        <p class="mb-0">{{ dados_comparacao.ultimo.repeticoes }} reps</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card {% if dados_comparacao.progresso_carga > 0 %}bg-success text-white{% else %}bg-danger text-white{% endif %}">
+                                    <div class="card-body text-center">
+                                        <h5>Progresso Total</h5>
+                                        <h3>
+                                            {% if dados_comparacao.progresso_carga > 0 %}+{% endif %}{{ dados_comparacao.progresso_carga|floatformat:1 }} kg
+                                            <br>
+                                            <small>
+                                                ({% if dados_comparacao.progresso_percentual > 0 %}+{% endif %}{{ dados_comparacao.progresso_percentual|floatformat:1 }}%)
+                                            </small>
+                                        </h3>
+                                        <p class="mb-0">
+                                            {% if dados_comparacao.progresso_carga > 0 %}
+                                            🎉 Excelente progresso! Continue assim!
+                                            {% else %}
+                                            💪 Foco no treino! Você consegue melhorar!
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% elif request.method == 'POST' %}
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Não há dados suficientes para comparar este exercício.
+                    <br>
+                    <small>É necessário pelo menos 2 registros do mesmo exercício.</small>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Selecione um exercício para comparar a performance</h5>
+                    <p class="text-muted">Veja sua evolução desde o primeiro até o último registro</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

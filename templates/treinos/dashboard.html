@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3">Dashboard</h1>
+        <p class="text-muted">Bem-vindo de volta, {{ user.username }}! 💪</p>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_treinos }}</h4>
+                        <p class="card-text">Total de Treinos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-dumbbell fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico de Progresso -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Progresso de Carga</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="progressoChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos Treinos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">Últimos Treinos</h5>
+                <a href="{% url 'criar_treino' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>Novo Treino
+                </a>
+            </div>
+            <div class="card-body">
+                {% if ultimos_treinos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Tipo de Treino</th>
+                                    <th>Exercícios</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for treino in ultimos_treinos %}
+                                <tr>
+                                    <td>{{ treino.data }}</td>
+                                    <td>{{ treino.tipo_treino }}</td>
+                                    <td>{{ treino.exercicios.count }}</td>
+                                    <td>
+                                        <a href="{% url 'detalhes_treino' treino.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">Nenhum treino registrado ainda.</p>
+                    <div class="text-center">
+                        <a href="{% url 'criar_treino' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Criar Primeiro Treino
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dadosCarga = {{ dados_carga_json|safe }};
+    const ctx = document.getElementById('progressoChart').getContext('2d');
+    
+    // Verificar se há dados para mostrar
+    const hasData = dadosCarga.some(exercicio => exercicio.cargas.length > 0);
+    
+    if (hasData) {
+        const cores = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+        
+        const datasets = dadosCarga.map((exercicio, index) => ({
+            label: exercicio.exercicio,
+            data: exercicio.cargas,
+            borderColor: cores[index % cores.length],
+            backgroundColor: cores[index % cores.length] + '20',
+            tension: 0.4,
+            fill: false
+        }));
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dadosCarga[0].datas, // Usar as datas do primeiro exercício
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Evolução de Cargas nos Exercícios'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Carga (kg)'
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        // Mostrar mensagem quando não há dados
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#666';
+        ctx.textAlign = 'center';
+        ctx.fillText('Nenhum dado de treino disponível', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.fillText('Crie seu primeiro treino!', ctx.canvas.width / 2, ctx.canvas.height / 2 + 25);
+    }
+});
+</script>
+{% endblock %}

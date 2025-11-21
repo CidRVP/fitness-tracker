@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Novo Treino</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="treino-form">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label for="{{ form.data.id_for_label }}" class="form-label">Data do Treino</label>
+                            {{ form.data }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.tipo_treino.id_for_label }}" class="form-label">Tipo de Treino</label>
+                            {{ form.tipo_treino }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações</label>
+                            {{ form.observacoes }}
+                        </div>
+                    </div>
+                    
+                    <h5 class="mb-3">Exercícios</h5>
+                    
+                    {{ formset.management_form }}
+                    <div id="exercicios-formset">
+                        {% for form_exercicio in formset %}
+                        <div class="exercicio-form row mb-3 border-bottom pb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Exercício</label>
+                                {{ form_exercicio.exercicio }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Séries</label>
+                                {{ form_exercicio.series }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Repetições</label>
+                                {{ form_exercicio.repeticoes }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Carga (kg)</label>
+                                {{ form_exercicio.carga }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Ordem</label>
+                                {{ form_exercicio.ordem }}
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                {% if form_exercicio.DELETE %}
+                                <div class="form-check mt-2">
+                                    {{ form_exercicio.DELETE }}
+                                    <label class="form-check-label" for="{{ form_exercicio.DELETE.id_for_label }}">
+                                        Excluir
+                                    </label>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {{ form_exercicio.id }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <button type="button" id="add-exercicio" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Adicionar Exercício
+                            </button>
+                            <button type="submit" class="btn btn-success float-end">
+                                <i class="fas fa-save me-1"></i>Salvar Treino
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addButton = document.getElementById('add-exercicio');
+    const formset = document.getElementById('exercicios-formset');
+    const totalForms = document.getElementById('id_exerciciotreino_set-TOTAL_FORMS');
+    
+    addButton.addEventListener('click', function() {
+        const total = parseInt(totalForms.value);
+        const newForm = formset.children[0].cloneNode(true);
+        
+        // Update all the names and IDs
+        const regex = new RegExp('exerciciotreino_set-' + (total - 1) + '-', 'g');
+        newForm.innerHTML = newForm.innerHTML.replace(regex, 'exerciciotreino_set-' + total + '-');
+        
+        // Clear values
+        const inputs = newForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            if (input.type !== 'hidden' && !input.name.includes('DELETE')) {
+                input.value = '';
+            }
+        });
+        
+        formset.appendChild(newForm);
+        totalForms.value = total + 1;
+    });
+});
+</script>
+{% endblock %}
