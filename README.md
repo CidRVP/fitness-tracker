@@ -20,7 +20,7 @@ Sistema completo de gestão de treinamentos desenvolvido em Django.
 ## 📦 Instalação
 
 ```bash
-git clone https://github.com/cidguilherme/fitness-tracker.git
+git clone https://github.com/CidRVP/fitness-tracker.git
 cd fitness-tracker
 python -m venv venv
 venv\Scripts\activate
